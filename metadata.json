@@ -1,0 +1,8 @@
+{
+  "name": "Tewedaj Online Lottery",
+  "description": "የተወዳጅ ኦንላይን ሎተሪ ትኬቶችን ለመቁረጥ፣ በቴሌብር እና በንግድ ባንክ ክፍያዎችን ለመፈጸም፣ ዕጣዎችን ለማረጋገጥ እና አሸናፊዎችን ለማሳወቅ የሚያገለግል ደህንነቱ የተጠበቀ የቴሌግራም ቦት እና ዌብ አፕ መድረክ።",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

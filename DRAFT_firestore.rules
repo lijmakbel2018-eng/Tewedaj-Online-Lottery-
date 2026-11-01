@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Functions ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isEmailVerified() && request.auth.token.email == "lijmakbel2026@gmail.com";
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidWallet(data) {
+      return data.userId is string && data.userId.size() <= 128
+          && data.phone is string && data.phone.size() <= 25
+          && (data.keys().hasOnly(['userId', 'phone', 'fullName', 'walletBalance', 'ticketsCount', 'totalWon', 'lastActive', 'telegramId', 'isOnline', 'username', 'profileImage', 'customerId', 'name', 'registeredAt', 'password']));
+    }
+
+    function isValidTicket(data) {
+      return data.id is string && data.id.size() <= 128
+          && data.lotteryId is string && data.lotteryId.size() <= 64
+          && data.ticketNumber is string && data.ticketNumber.size() <= 20
+          && data.userId is string && data.userId.size() <= 128
+          && data.pricePaid is number
+          && (data.keys().hasOnly(['id', 'lotteryId', 'ticketNumber', 'userId', 'userPhone', 'userTelegram', 'pricePaid', 'purchasedAt', 'status', 'userName', 'paymentMethod', 'paymentReference', 'securityHash', 'lotteryTitleAm', 'lotteryTitleEn']));
+    }
+
+    function isValidTransaction(data) {
+      return data.id is string && data.id.size() <= 128
+          && data.userId is string && data.userId.size() <= 128
+          && data.amount is number
+          && data.type is string && data.type.size() <= 32
+          && data.status is string && data.status.size() <= 32
+          && (data.keys().hasOnly(['id', 'userId', 'userName', 'userPhone', 'telegramId', 'amount', 'type', 'typeAm', 'status', 'statusAm', 'referenceNumber', 'timestamp', 'paymentMethod', 'paymentMethodAm', 'gatewayFee', 'descriptionAm', 'screenshotUrl', 'lotteryId', 'lotteryTitleAm']));
+    }
+
+    function isValidGroupChatMessage(data) {
+      return data.id is string && data.id.size() <= 128
+          && data.senderName is string && data.senderName.size() <= 100
+          && data.text is string && data.text.size() <= 1000
+          && data.timestamp is string;
+    }
+
+    // --- Collection Matches ---
+
+    match /wallets/{walletId} {
+      allow read: if isAdmin() || (isSignedIn() && (walletId == request.auth.uid || walletId == 'tg_' + string(request.auth.token.firebase.identities['google.com'][0]) /* approximate mapping */));
+      // For now, allow create if signed in, but in a production app we'd want to verify the user owns the phone/ID
+      allow create: if isSignedIn() && isValidWallet(incoming());
+      allow update: if (isAdmin() || (isSignedIn() && (walletId == request.auth.uid || walletId == 'tg_' + string(request.auth.token.firebase.identities['google.com'][0]))))
+                   && isValidWallet(incoming());
+    }
+
+    match /tickets/{ticketId} {
+      allow read: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidTicket(incoming());
+      allow update: if isAdmin() && isValidTicket(incoming());
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidTransaction(incoming());
+      allow update: if isAdmin() && isValidTransaction(incoming());
+    }
+
+    match /group_chat/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidGroupChatMessage(incoming());
+      allow delete: if isAdmin();
+    }
+
+    match /dashboard/{dashboardId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /dashboard_activities/{activityId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn(); // System activities often recorded by client actions
+    }
+
+    match /keri_etsa/{lotteryId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /system_settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

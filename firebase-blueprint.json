@@ -1,0 +1,161 @@
+{
+  "entities": {
+    "Wallet": {
+      "title": "User Wallet",
+      "description": "User profile, balance, and account state",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "phone": { "type": "string" },
+        "fullName": { "type": "string" },
+        "walletBalance": { "type": "number" },
+        "ticketsCount": { "type": "number" },
+        "totalWon": { "type": "number" }
+      },
+      "required": ["userId", "phone", "walletBalance"]
+    },
+    "Ticket": {
+      "title": "Lottery Ticket",
+      "description": "Purchased ticket details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "lotteryId": { "type": "string" },
+        "ticketNumber": { "type": "string" },
+        "userId": { "type": "string" },
+        "userPhone": { "type": "string" },
+        "pricePaid": { "type": "number" },
+        "purchasedAt": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "lotteryId", "ticketNumber", "userId"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Deposit, withdrawal, or ticket purchase transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "referenceNumber": { "type": "string" }
+      },
+      "required": ["id", "amount", "type", "status"]
+    },
+    "GroupChatMessage": {
+      "title": "Group Chat Message",
+      "description": "Community chat messages",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderPhone": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "senderName", "text", "timestamp"]
+    },
+    "DashboardActivity": {
+      "title": "Dashboard Activity Event",
+      "description": "Permanent audit log of every movement in the app (ticket cuts, deposits, withdrawals, registrations, draws)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "titleAm": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "descriptionAm": { "type": "string" },
+        "descriptionEn": { "type": "string" },
+        "userPhone": { "type": "string" },
+        "userName": { "type": "string" },
+        "amount": { "type": "number" },
+        "ticketNumber": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "type", "titleAm", "descriptionAm", "timestamp"]
+    },
+    "FinancialSummary": {
+      "title": "Financial Summary (Gebi & Wechi)",
+      "description": "Permanent ledger of total income, expenses, and individual balances",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "totalDeposits": { "type": "number" },
+        "totalWithdrawals": { "type": "number" },
+        "totalTicketPurchases": { "type": "number" },
+        "totalPrizesPaid": { "type": "number" },
+        "netBalance": { "type": "number" },
+        "lastUpdated": { "type": "string" }
+      },
+      "required": ["id", "totalDeposits", "totalWithdrawals", "lastUpdated"]
+    },
+    "DashboardOverview": {
+      "title": "Dashboard Overview",
+      "description": "Real-time lottery activity, tickets cut count (0/150), unique buyers, income (gebi), expense (wechi), and remaining tickets (keri etsa)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "totalTicketsSold": { "type": "number" },
+        "ticketsCutCount": { "type": "number" },
+        "activeTicketsCount": { "type": "number" },
+        "uniqueBuyersCount": { "type": "number" },
+        "totalVolume": { "type": "number" },
+        "totalDeposits": { "type": "number" },
+        "totalWithdrawals": { "type": "number" },
+        "totalRegisteredUsers": { "type": "number" },
+        "lastUpdated": { "type": "string" }
+      },
+      "required": ["id", "totalTicketsSold", "ticketsCutCount", "uniqueBuyersCount", "lastUpdated"]
+    },
+    "LotteryKeriEtsa": {
+      "title": "Lottery Remaining Chances (Keri Etsa)",
+      "description": "Real-time ticket volume, inventory, and remaining tickets for active draws including 32 Inch TV",
+      "type": "object",
+      "properties": {
+        "lotteryId": { "type": "string" },
+        "titleAm": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "ticketPrice": { "type": "number" },
+        "jackpotAmount": { "type": "number" },
+        "totalInventory": { "type": "number" },
+        "ticketsSold": { "type": "number" },
+        "keriEtsa": { "type": "number" },
+        "round": { "type": "number" },
+        "buyersCount": { "type": "number" }
+      },
+      "required": ["lotteryId", "ticketPrice", "totalInventory", "ticketsSold", "keriEtsa"]
+    }
+  },
+  "firestore": {
+    "/wallets/{walletId}": {
+      "schema": { "$ref": "#/entities/Wallet" },
+      "description": "Permanent collection of user wallets, individual accounts, and balances"
+    },
+    "/tickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/Ticket" },
+      "description": "Permanent non-deletable collection of purchased lottery tickets"
+    },
+    "/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Permanent non-deletable collection of financial transactions (gebi deposits and wechi withdrawals)"
+    },
+    "/group_chat/{messageId}": {
+      "schema": { "$ref": "#/entities/GroupChatMessage" },
+      "description": "Collection of community chat messages"
+    },
+    "/dashboard/{dashboardId}": {
+      "schema": { "$ref": "#/entities/DashboardOverview" },
+      "description": "Collection storing real-time dashboard data, tickets cut count (0/150), keri etsa (remaining chances), and financial summary (gebi & wechi)"
+    },
+    "/dashboard_activities/{activityId}": {
+      "schema": { "$ref": "#/entities/DashboardActivity" },
+      "description": "Permanent real-time activity log of every transaction, ticket purchase, and system event"
+    },
+    "/keri_etsa/{lotteryId}": {
+      "schema": { "$ref": "#/entities/LotteryKeriEtsa" },
+      "description": "Collection storing real-time remaining tickets (keri etsa) and sold counts per lottery draw (32 Inch TV, 1k, 5k, 10k, 50k)"
+    }
+  }
+}

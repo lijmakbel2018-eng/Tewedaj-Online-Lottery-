@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: tewedaj-lottery-bot
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8577097699:AAEwbW_yXyU1q0RgRi7J0GXAEnKboY6wFzM
